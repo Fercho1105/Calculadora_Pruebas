@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Mejorada</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: #232323;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .calculadora {
+            background-color: #48BFFF;
+            color: white;
+            width: 350px;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            box-shadow: 0 0 20px #48BFFF;
+        }
+
+        .pantalla {
+            grid-column: 1 / 5;
+            background-color: #090c31;
+            padding: 1.5rem;
+            font-size: 2rem;
+            text-align: right;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-family: monospace;
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn {
+            background-color: #006DA7;
+            color: white;
+            border: 0;
+            padding: 1.5rem 0.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #004F78;
+            font-weight: bold;
+        }
+
+        .info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .historial, .memoria {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            width: 200px;
+            min-height: 150px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .historial h4, .memoria h4 {
+            text-align: center;
+            color: black;
+        }
+
+        #historial-list, #memoria-list {
+            list-style: none;
+            padding: 5px;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calculadora">
+            <input type="text" class="pantalla" id="pantalla" readonly>
+            <button class="btn" onclick="clearScreen()">C</button>
+            <button class="btn" onclick="deleteLastDigit()">⌫</button>
+            <button class="btn" onclick="deleteLastOperator()">⌦</button>
+            <button class="btn" onclick="calculatePercentage()">%</button>
+            <button class="btn" onclick="appendNumber('7')">7</button>
+            <button class="btn" onclick="appendNumber('8')">8</button>
+            <button class="btn" onclick="appendNumber('9')">9</button>
+            <button class="btn" onclick="appendOperator('+')">+</button>
+            <button class="btn" onclick="appendNumber('4')">4</button>
+            <button class="btn" onclick="appendNumber('5')">5</button>
+            <button class="btn" onclick="appendNumber('6')">6</button>
+            <button class="btn" onclick="appendOperator('-')">-</button>
+            <button class="btn" onclick="appendNumber('1')">1</button>
+            <button class="btn" onclick="appendNumber('2')">2</button>
+            <button class="btn" onclick="appendNumber('3')">3</button>
+            <button class="btn" onclick="appendOperator('*')">*</button>
+            <button class="btn" onclick="appendNumber('0')">0</button>
+            <button class="btn" onclick="appendDecimal()">.</button>
+            <button class="btn" onclick="calculateResult()">=</button>
+            <button class="btn" onclick="appendOperator('/')">/</button>
+            <button class="btn" onclick="memoryClear()">MC</button>
+            <button class="btn" onclick="memoryRecall()">MR</button>
+            <button class="btn" onclick="memoryAdd()">M+</button>
+            <button class="btn" onclick="memorySubtract()">M-</button>
+        </div>
+
+        <div class="info">
+            <div class="historial">
+                <h4>Historial</h4>
+                <ul id="historial-list"></ul>
+            </div>
+            <div class="memoria">
+                <h4>Memoria</h4>
+                <ul id="memoria-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pantalla = document.getElementById("pantalla");
+        let historialList = document.getElementById("historial-list");
+        let memoriaList = document.getElementById("memoria-list");
+        let memoria = 0;
+        let nuevaOperacion = false;
+
+        function appendNumber(num) {
+            if (nuevaOperacion || pantalla.value === "ERROR") {
+                pantalla.value = "";
+                nuevaOperacion = false;
+            }
+            pantalla.value += num;
+        }
+        
+        
+        
+
+        function appendOperator(op) {
+            if (pantalla.value === "ERROR") return; // Evitar errores
+
+            // Permitir el "-" al inicio para números negativos
+            if (op === "-" && pantalla.value === "") {
+                pantalla.value = "-";
+                return;
+            }
+
+            // Permitir usar "-" después de un operador (Ejemplo: 5 * -5)
+            if (op === "-" && /[+\-*/]$/.test(pantalla.value)) {
+                pantalla.value += "-";
+                return;
+            }
+
+            // Evitar operadores consecutivos, excepto el caso de "-" negativo
+            if (/[-+*/]$/.test(pantalla.value)) return;
+
+            pantalla.value += op;
+        }
+
+
+        function appendDecimal() {
+            let partes = pantalla.value.split(/[-+*/%]/);
+            let ultimaParte = partes[partes.length - 1];
+            if (!ultimaParte.includes('.')) {
+                pantalla.value += '.';
+            }
+        }
+
+        function calculatePercentage() {
+            if (pantalla.value === "" || pantalla.value === "ERROR") return;
+
+            let lastOperatorIndex = Math.max(
+                pantalla.value.lastIndexOf("+"),
+                pantalla.value.lastIndexOf("-"),
+                pantalla.value.lastIndexOf("*"),
+                pantalla.value.lastIndexOf("/")
+            );
+
+            if (lastOperatorIndex !== -1) {
+                let base = pantalla.value.substring(0, lastOperatorIndex + 1);
+                let number = pantalla.value.substring(lastOperatorIndex + 1);
+
+                if (!number.includes("%") && !isNaN(number) && number !== "") { 
+                    pantalla.value = base + (parseFloat(number) * 0.01);
+                }
+            } 
+        }
+
+
+
+
+        function clearScreen() {
+            pantalla.value = "";
+            historialList.innerHTML = "";
+        }
+
+        function deleteLastDigit() {
+            pantalla.value = pantalla.value.slice(0, -1);
+        }
+
+        function deleteLastOperator() {
+            pantalla.value = pantalla.value.replace(/[-+*/%][^+*/%-]*$/, '');
+        }
+
+        function calculateResult() {
+            try {
+                if (pantalla.value.includes('/0')) {
+                    throw new Error("ERROR");
+                }
+                let operacion = pantalla.value;
+                let result = eval(pantalla.value);
+                pantalla.value = result.toFixed(2);
+                historialList.innerHTML += `<li>${operacion} = ${result.toFixed(2)}</li>`;
+                nuevaOperacion = true;
+            } catch (error) {
+                pantalla.value = "ERROR";
+            }
+        }
+
+        function memoryClear() {
+            memoria = 0;
+            memoriaList.innerHTML = "";
+        }
+
+        function memoryRecall() {
+            pantalla.value = memoria;
+        }
+
+        function memoryAdd() {
+            memoria += parseFloat(pantalla.value) || 0;
+            memoriaList.innerHTML = `<li>${memoria}</li>`;
+            pantalla.value = "";
+        }
+
+        function memorySubtract() {
+            memoria -= parseFloat(pantalla.value) || 0;
+            memoriaList.innerHTML = `<li>${memoria}</li>`;
+            pantalla.value = "";
+        }
+    </script>
+</body>
+</html>
