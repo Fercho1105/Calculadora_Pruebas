@@ -14,7 +14,7 @@ Este proyecto es una calculadora web desarrollada en HTML, CSS y JavaScript. Per
 ## Instalación
 1. Clonar el repositorio:
    ```bash
-   git clone https://github.com/tu-usuario/Calculadora-IngPruebas.git
+   git clone https://github.com/fercho1105/Calculadora_Pruebas.git
    ```
 2. Abrir el archivo `index.html` en un navegador.
 
