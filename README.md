@@ -11,11 +11,5 @@ Este proyecto es una calculadora web desarrollada en HTML, CSS y JavaScript. Per
 - Botones de memoria: MC, MR, M+, M-.
 - Estilo moderno y responsivo.
 
-## Uso
-- Ingrese los números y seleccione una operación.
-- Presione `=` para calcular el resultado.
-- Use `C` para borrar la operación, `⌫` para eliminar el último dígito y `⌦` para borrar hasta el último operador.
-- Utilice los botones de memoria para almacenar y recuperar valores.
-
 
 
